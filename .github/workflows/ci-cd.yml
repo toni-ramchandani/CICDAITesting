@@ -1,7 +1,6 @@
 name: Giskard-CI-CD
 
 on:
-  workflow_dispatch:
   pull_request:
     paths:
       - 'data/**'
@@ -56,4 +55,4 @@ jobs:
               });
             } else {
               console.log("No issue number found. This may not be a pull request event.");
-            });
+            }
