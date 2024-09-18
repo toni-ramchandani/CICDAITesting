@@ -51,9 +51,6 @@ jobs:
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: 'Test Suites Results:
-
-```json
-' + JSON.stringify(JSON.parse(process.env.TEST_RESULT), null, 2) + '
-```'
+                   body: 'Test Suites Results:\n\n```json\n' + JSON.stringify(JSON.parse(process.env.TEST_RESULT), null, 2) + '\n```'
                 })
+                  
