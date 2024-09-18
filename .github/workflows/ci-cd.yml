@@ -39,20 +39,39 @@ jobs:
 
       - name: Execute Giskard Test Suite
         run: python giskard_validation.py
+
+      - name: Debugging TEST_RESULT
+        run: |
+          echo "TEST_RESULT: ${{ env.TEST_RESULT }}"
+          echo "TEST_RESULT raw content: $(echo $TEST_RESULT)"
       
       - name: PR comment
         uses: actions/github-script@v6
         with:
           script: |
-            const issue_number = context.payload.pull_request ? context.payload.pull_request.number : null;
-            if (issue_number) {
-              const testResults = JSON.stringify(JSON.parse(process.env.TEST_RESULT), null, 2);
-              github.rest.issues.createComment({
-                issue_number: issue_number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `Test Suites Results:\n\n\`\`\`json\n${testResults}\n\`\`\``
-              });
-            } else {
-              console.log("No issue number found. This may not be a pull request event.");
+            try {
+              const issue_number = context.payload.pull_request ? context.payload.pull_request.number : null;
+              if (issue_number) {
+                if (!process.env.TEST_RESULT) {
+                  console.log("No TEST_RESULT found.");
+                  return;
+                }
+                let testResults;
+                try {
+                  testResults = JSON.stringify(JSON.parse(process.env.TEST_RESULT), null, 2);
+                } catch (error) {
+                  console.log("Error parsing TEST_RESULT:", error.message);
+                  return;
+                }
+                github.rest.issues.createComment({
+                  issue_number: issue_number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `Test Suites Results:\n\n\`\`\`json\n${testResults}\n\`\`\``
+                });
+              } else {
+                console.log("No issue number found. This may not be a pull request event.");
+              }
+            } catch (error) {
+              console.log("Error in PR comment action:", error.message);
             }
